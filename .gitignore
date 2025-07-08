@@ -1,0 +1,12 @@
+# Node.js
+node_modules/
+dist/
+.env
+.env.*
+# Log dosyaları
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+# Sistem dosyaları
+.DS_Store
+Thumbs.db 
