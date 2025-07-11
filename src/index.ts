@@ -68,11 +68,11 @@ const uploadMultiple = multer({
 
 // PostgreSQL bağlantısı - Elle yazılmış bilgiler
 const pool = new Pool({
-  host: process.env.DB_HOST /*|| 'localhost'*/,
-  port: Number(process.env.DB_PORT) /*|| 5000*/,
-  user: process.env.DB_USER /*|| 'postgres'*/,
-  password: process.env.DB_PASSWORD /*|| '123mert123'*/,
-  database: process.env.DB_NAME /*|| 'dental_app'*/,
+  host: process.env.DB_HOST || 'localhost',
+  port: Number(process.env.DB_PORT) || 5000,
+  user: process.env.DB_USER || 'postgres',
+  password: process.env.DB_PASSWORD || '123mert123',
+  database: process.env.DB_NAME || 'dental_app',
 });
 
 // Tüm tabloları oluşturan fonksiyon
@@ -232,6 +232,35 @@ const initializeDatabase = async () => {
       );
       console.log('Varsayılan admin kullanıcısı oluşturuldu');
     }
+
+    // Videos tablosunda video_id kolonu yoksa ekle
+    await pool.query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns 
+          WHERE table_name='videos' AND column_name='video_id'
+        ) THEN
+          ALTER TABLE videos ADD COLUMN video_id VARCHAR(255);
+        END IF;
+      END
+      $$;
+    `);
+    // Videos tablosunda long_description kolonu yoksa ekle
+    await pool.query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns 
+          WHERE table_name='videos' AND column_name='long_description'
+        ) THEN
+          ALTER TABLE videos ADD COLUMN long_description TEXT;
+        END IF;
+      END
+      $$;
+    `);
+    // Videos tablosunda url kolonu yoksa ekle (eğer frontend video_id ile çalışıyorsa url yerine video_id kullanılacak)
+    // Eğer url kullanılmıyorsa bu kısmı silebilirsin
 
     console.log('Tüm tablolar başarıyla oluşturuldu');
   } catch (error) {
