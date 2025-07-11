@@ -259,8 +259,19 @@ const initializeDatabase = async () => {
       END
       $$;
     `);
-    // Videos tablosunda url kolonu yoksa ekle (eğer frontend video_id ile çalışıyorsa url yerine video_id kullanılacak)
-    // Eğer url kullanılmıyorsa bu kısmı silebilirsin
+    // Videos tablosunda url kolonu varsa sil
+    await pool.query(`
+      DO $$
+      BEGIN
+        IF EXISTS (
+          SELECT 1 FROM information_schema.columns 
+          WHERE table_name='videos' AND column_name='url'
+        ) THEN
+          ALTER TABLE videos DROP COLUMN url;
+        END IF;
+      END
+      $$;
+    `);
 
     console.log('Tüm tablolar başarıyla oluşturuldu');
   } catch (error) {
